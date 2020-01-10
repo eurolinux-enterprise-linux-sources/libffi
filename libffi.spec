@@ -2,7 +2,7 @@
 
 Name:		libffi
 Version:	3.0.13
-Release:	16%{?dist}
+Release:	18%{?dist}
 Summary:	A portable foreign function interface library
 
 Group:		System Environment/Libraries
@@ -19,6 +19,10 @@ Patch10:	libffi-3.0.13-ppc64le-0.patch
 Patch11:	libffi-3.0.13-ppc64le-1.patch
 Patch12:	libffi-3.0.13-ppc64le-2.patch
 Patch13:	libffi-3.0.13-ppc64le-3.patch
+# rhbz 1287815:
+Patch20:	libffi-aarch64-rhbz1174037.patch
+
+Patch21:        libffi-3.0.13-closures-Create-temporary-file-with-O_TMPFILE-and-O_.patch
 %ifarch ppc64le
 BuildRequires:  autoconf automake libtool texinfo
 %endif
@@ -78,7 +82,8 @@ developing applications that use %{name}.
 autoreconf -vif
 %endif
 
-
+%patch20 -p1 -b .aarch64
+%patch21 -p1 -b .tmpfile
 %build
 CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing" %configure --disable-static
 make %{?_smp_mflags}
@@ -139,6 +144,14 @@ fi
 %{_infodir}/libffi.info.gz
 
 %changelog
+* Tue Apr  5 2016 Andrew Haley <aph@redhat.com> - 3.0.13-18
+- closures: Create temporary file with O_TMPFILE and O_CLOEXEC
+- Resolves: RHBZ1151568
+
+* Tue Apr  5 2016 Andrew Haley <aph@redhat.com> - 3.0.13-17
+- libffi needs fix for structures not passed in registers
+- Resolves: RHBZ1287815
+
 * Tue Sep 02 2014 Dan Horák <dhorak@redhat.com> - 3.0.13-16
 - Drop ppc64le from the multilib list
 - Use additional BR: only in ppc64le build
