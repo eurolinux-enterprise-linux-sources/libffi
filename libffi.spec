@@ -1,8 +1,8 @@
-%global multilib_arches %{ix86} ppc ppc64 s390 s390x x86_64
+%global multilib_arches %{ix86} ppc %{power64} s390 s390x x86_64
 
 Name:		libffi
 Version:	3.0.13
-Release:	18%{?dist}
+Release:	7%{?dist}
 Summary:	A portable foreign function interface library
 
 Group:		System Environment/Libraries
@@ -13,19 +13,7 @@ Source0:	ftp://sourceware.org/pub/libffi/libffi-%{version}.tar.gz
 Source1:	ffi-multilib.h
 Source2:	ffitarget-multilib.h
 Patch0:		libffi-3.0.13-fix-include-path.patch
-Patch1:		libffi-fix-ppc-tests.patch
 # part of upstream commit 5feacad4
-Patch10:	libffi-3.0.13-ppc64le-0.patch
-Patch11:	libffi-3.0.13-ppc64le-1.patch
-Patch12:	libffi-3.0.13-ppc64le-2.patch
-Patch13:	libffi-3.0.13-ppc64le-3.patch
-# rhbz 1287815:
-Patch20:	libffi-aarch64-rhbz1174037.patch
-
-Patch21:        libffi-3.0.13-closures-Create-temporary-file-with-O_TMPFILE-and-O_.patch
-%ifarch ppc64le
-BuildRequires:  autoconf automake libtool texinfo
-%endif
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -72,20 +60,10 @@ developing applications that use %{name}.
 %prep
 %setup -q
 %patch0 -p1 -b .fixpath
-%patch1 -p1 -b .fixpath
-%ifarch ppc64le
-%patch10 -p1 -b .ppc64le-0
-%patch11 -p1 -b .ppc64le-1
-%patch12 -p1 -b .ppc64le-2
-%patch13 -p1 -b .ppc64le-3
 
-autoreconf -vif
-%endif
 
-%patch20 -p1 -b .aarch64
-%patch21 -p1 -b .tmpfile
 %build
-CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing" %configure --disable-static
+%configure --disable-static
 make %{?_smp_mflags}
 
 
@@ -144,49 +122,6 @@ fi
 %{_infodir}/libffi.info.gz
 
 %changelog
-* Tue Apr  5 2016 Andrew Haley <aph@redhat.com> - 3.0.13-18
-- closures: Create temporary file with O_TMPFILE and O_CLOEXEC
-- Resolves: RHBZ1151568
-
-* Tue Apr  5 2016 Andrew Haley <aph@redhat.com> - 3.0.13-17
-- libffi needs fix for structures not passed in registers
-- Resolves: RHBZ1287815
-
-* Tue Sep 02 2014 Dan Horák <dhorak@redhat.com> - 3.0.13-16
-- Drop ppc64le from the multilib list
-- Use additional BR: only in ppc64le build
-- Resolves: RHBZ1116945
-
-* Tue Aug 26 2014 Andrew Haley <aph@redhat.com> - 3.0.13-15
-- Add requires for libtool and texinfo
-- Resolves: RHBZ1116945
-
-* Tue Aug 26 2014 Andrew Haley <aph@redhat.com> - 3.0.13-14
-- Add requires for automake
-- Resolves: RHBZ1116945
-
-* Tue Aug 26 2014 Andrew Haley <aph@redhat.com> - 3.0.13-13
-- Add requires for autoconf
-- Resolves: RHBZ1116945
-
-* Tue Aug 26 2014 Andrew Haley <aph@redhat.com> - 3.0.13-12
-- Merge from private-rhel-7.0-ppc64le branch
-- Resolves: RHBZ1116945
-
-* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 3.0.13-11
-- Mass rebuild 2014-01-24
-
-* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 3.0.13-10
-- Mass rebuild 2013-12-27
-
-* Wed Dec 18 2013 Deepak Bhole <dbhole@redhat.com> - 3.0.13-9
-- Added -fno-strict-aliasing (pointed out by rpmdiff)
-- Fixes RHBZ 1006261
-
-* Fri Nov 15 2013 Jon VanAlten <jon.vanalten@redhat.com> - 3.0.13-8
-- Patch test suite to fix errors on ppc64
-- Fixes RHBZ 1006261
-
 * Thu Aug 22 2013 Deepak Bhole <dbhole@redhat.com> - 3.0.13-7
 - Removed temporarily introduced compat package for OpenJDk6 bootstrap
 
