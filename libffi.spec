@@ -1,8 +1,8 @@
-%global multilib_arches %{ix86} ppc %{power64} s390 s390x x86_64
+%global multilib_arches %{ix86} ppc ppc64 s390 s390x x86_64
 
 Name:		libffi
 Version:	3.0.13
-Release:	11%{?dist}
+Release:	16%{?dist}
 Summary:	A portable foreign function interface library
 
 Group:		System Environment/Libraries
@@ -15,6 +15,13 @@ Source2:	ffitarget-multilib.h
 Patch0:		libffi-3.0.13-fix-include-path.patch
 Patch1:		libffi-fix-ppc-tests.patch
 # part of upstream commit 5feacad4
+Patch10:	libffi-3.0.13-ppc64le-0.patch
+Patch11:	libffi-3.0.13-ppc64le-1.patch
+Patch12:	libffi-3.0.13-ppc64le-2.patch
+Patch13:	libffi-3.0.13-ppc64le-3.patch
+%ifarch ppc64le
+BuildRequires:  autoconf automake libtool texinfo
+%endif
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -62,6 +69,14 @@ developing applications that use %{name}.
 %setup -q
 %patch0 -p1 -b .fixpath
 %patch1 -p1 -b .fixpath
+%ifarch ppc64le
+%patch10 -p1 -b .ppc64le-0
+%patch11 -p1 -b .ppc64le-1
+%patch12 -p1 -b .ppc64le-2
+%patch13 -p1 -b .ppc64le-3
+
+autoreconf -vif
+%endif
 
 
 %build
@@ -124,6 +139,27 @@ fi
 %{_infodir}/libffi.info.gz
 
 %changelog
+* Tue Sep 02 2014 Dan Horák <dhorak@redhat.com> - 3.0.13-16
+- Drop ppc64le from the multilib list
+- Use additional BR: only in ppc64le build
+- Resolves: RHBZ1116945
+
+* Tue Aug 26 2014 Andrew Haley <aph@redhat.com> - 3.0.13-15
+- Add requires for libtool and texinfo
+- Resolves: RHBZ1116945
+
+* Tue Aug 26 2014 Andrew Haley <aph@redhat.com> - 3.0.13-14
+- Add requires for automake
+- Resolves: RHBZ1116945
+
+* Tue Aug 26 2014 Andrew Haley <aph@redhat.com> - 3.0.13-13
+- Add requires for autoconf
+- Resolves: RHBZ1116945
+
+* Tue Aug 26 2014 Andrew Haley <aph@redhat.com> - 3.0.13-12
+- Merge from private-rhel-7.0-ppc64le branch
+- Resolves: RHBZ1116945
+
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 3.0.13-11
 - Mass rebuild 2014-01-24
 

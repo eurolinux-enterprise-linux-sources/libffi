@@ -1,0 +1,72 @@
+Date: Wed, 20 Nov 2013 18:05:21 +1030
+From: Alan Modra <amodra at gmail dot com>
+To: libffi-discuss at sourceware dot org
+Subject: PowerPC64 ELFv2 fix 2 of 2
+Message-ID: <20131120073521.GG22514@bubble.grove.modra.org>
+References: <20131117031650.GR22514@bubble.grove.modra.org> <87eh6e2b4o.fsf@redhat.com> <20131119001430.GX22514@bubble.grove.modra.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20131119001430 dot GX22514 at bubble dot grove dot modra dot org>
+User-Agent: Mutt/1.5.21 (2010-09-15)
+
+Using NUM_FPR_ARG_REGISTERS rather than NUM_FPR_ARG_REGISTERS64 meant
+that a parameter save area could be allocated before it was strictly
+necessary.  Wrong but harmless.  Found when splitting apart ffi.c
+into 32-bit and 64-bit support.
+
+	* src/powerpc/ffi.c (ffi_prep_cif_machdep_core): Use
+	NUM_FPR_ARG_REGISTERS64 and NUM_GPR_ARG_REGISTERS64 not their
+	32-bit versions for 64-bit code.
+
+diff --git a/src/powerpc/ffi.c b/src/powerpc/ffi.c
+index feb2144..6896065 100644
+--- a/src/powerpc/ffi.c
++++ b/src/powerpc/ffi.c
+@@ -978,7 +978,7 @@ ffi_prep_cif_machdep_core (ffi_cif *cif)
+ 	  case FFI_TYPE_LONGDOUBLE:
+ 	    fparg_count += 2;
+ 	    intarg_count += 2;
+-	    if (fparg_count > NUM_FPR_ARG_REGISTERS)
++	    if (fparg_count > NUM_FPR_ARG_REGISTERS64)
+ 	      flags |= FLAG_ARG_NEEDS_PSAVE;
+ 	    break;
+ #endif
+@@ -986,7 +986,7 @@ ffi_prep_cif_machdep_core (ffi_cif *cif)
+ 	  case FFI_TYPE_DOUBLE:
+ 	    fparg_count++;
+ 	    intarg_count++;
+-	    if (fparg_count > NUM_FPR_ARG_REGISTERS)
++	    if (fparg_count > NUM_FPR_ARG_REGISTERS64)
+ 	      flags |= FLAG_ARG_NEEDS_PSAVE;
+ 	    break;
+ 
+@@ -1007,12 +1007,12 @@ ffi_prep_cif_machdep_core (ffi_cif *cif)
+ 	    if (elt)
+ 	      {
+ 		fparg_count += elnum;
+-		if (fparg_count > NUM_FPR_ARG_REGISTERS)
++		if (fparg_count > NUM_FPR_ARG_REGISTERS64)
+ 		  flags |= FLAG_ARG_NEEDS_PSAVE;
+ 	      }
+ 	    else
+ 	      {
+-		if (intarg_count > NUM_GPR_ARG_REGISTERS)
++		if (intarg_count > NUM_GPR_ARG_REGISTERS64)
+ 		  flags |= FLAG_ARG_NEEDS_PSAVE;
+ 	      }
+ 	    break;
+@@ -1030,7 +1030,7 @@ ffi_prep_cif_machdep_core (ffi_cif *cif)
+ 	    /* Everything else is passed as a 8-byte word in a GPR, either
+ 	       the object itself or a pointer to it.  */
+ 	    intarg_count++;
+-	    if (intarg_count > NUM_GPR_ARG_REGISTERS)
++	    if (intarg_count > NUM_GPR_ARG_REGISTERS64)
+ 	      flags |= FLAG_ARG_NEEDS_PSAVE;
+ 	    break;
+ 	  default:
+
+-- 
+Alan Modra
+Australia Development Lab, IBM
+
